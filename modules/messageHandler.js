@@ -25,7 +25,9 @@ module.exports = class MessageHandler extends Handler {
         if (message.content.startsWith("!")) {
             if (message.member.roles.cache.some(r => r.id === config["MOD_ROLE"])) {
                 if (message.content.startsWith("!send_embed")) {
-                    message.channel.send({embeds: [getGenericEmbed("Placeholder", "Placeholder")]});
+                    let leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
+                    if (leaderboardChannel.partial) await leaderboardChannel.fetch();
+                    leaderboardChannel.send({embeds: [getGenericEmbed("Placeholder", "Placeholder")]});
                 } else if (message.content.startsWith("!refresh_leaderboard")) {
                     await updateLeaderboard();
                 }

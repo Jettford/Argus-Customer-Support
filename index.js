@@ -11,7 +11,7 @@ global.client = new Client({
 
 let config = require('./config.json');
 
-global.handlerList = []
+global.handlerList = [];
 
 client.on('ready', () => {
     console.log("Started up bot")
