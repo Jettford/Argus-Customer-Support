@@ -15,6 +15,12 @@ const optionsForLeaderboard = [
         description: "The bottom 10 threads",
         value: "bottom_10",
         sql: "SELECT * FROM threads WHERE is_locked = 0 ORDER BY -(thumbs_up - thumbs_down) DESC LIMIT 10;"
+    },
+    {
+        label: "Top Controversial",
+        description: "The top 10 controversial threads",
+        value: "controversial_10",
+        sql: "SELECT * FROM threads WHERE is_locked = 0 ORDER BY (thumbs_up + thumbs_down) DESC LIMIT 10;"
     }
 ];
 
