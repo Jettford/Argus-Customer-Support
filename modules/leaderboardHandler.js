@@ -20,6 +20,12 @@ const optionsForLeaderboard = [
         label: "Top Controversial",
         description: "The top 10 controversial threads",
         value: "controversial_10",
+        sql: "SELECT * FROM threads WHERE is_locked = 0 ORDER BY -(ABS(thumbs_up - thumbs_down)) DESC LIMIT 10;"
+    },
+    {
+        label: "Most Popular",
+        description: "The most popular threads",
+        value: "popular_10",
         sql: "SELECT * FROM threads WHERE is_locked = 0 ORDER BY (thumbs_up + thumbs_down) DESC LIMIT 10;"
     }
 ];
@@ -32,7 +38,7 @@ async function updateLeaderboard() {
         const leaderboardEmbed = new MessageEmbed().setColor('#0099ff').setTitle("**Leaderboard**");
         let descriptionValue = ["**Top 10:** \n"];
         db.each("SELECT * FROM threads WHERE is_locked = 0 ORDER BY (thumbs_up - thumbs_down) DESC LIMIT 10;", [], async function (err, row) {
-            descriptionValue.push(`<#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
+            descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
         }, async () => {
             leaderboardEmbed.setDescription(descriptionValue.join("\n"));
             const row = new MessageActionRow().addComponents(new MessageSelectMenu().setCustomId('select').setPlaceholder('Sort by (default: Top 10)').addOptions(optionsForLeaderboard));
