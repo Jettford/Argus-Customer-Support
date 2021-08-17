@@ -43,40 +43,7 @@ module.exports = class MessageHandler extends Handler {
             let title = []; // can't set variables in lambdas but you can use arrays
 
             if (message.content.length > 30) {
-                let question = await message.author.send({embeds: [getGenericEmbed("Feedback Thread", "You tried to create a feedback thread but the feedback was too long to use as a title so could you please give us one to use under 30 character")]});
-
-                let filter = m => true;
-
-                while (true) {
-                    let doBreak = []; // can't set variables in lambdas but you can use arrays
-                    let doReturn = [];
-
-                    await question.channel.awaitMessages({filter, max: 1, time: 100000, errors: ['time']})
-                        .then(async collected => {
-                            let response = collected.first();
-                            if (response.content.length > 30) {
-                                await question.channel.send({embeds: [getGenericEmbed("Feedback Thread", "That is still greater then 30 character, please try again")]});
-                            } else {
-                                title.push(response.content);
-                                doBreak.push(true);
-                            }
-                        })
-                        .catch(async collected => {
-                            await question.channel.send({embeds: [getGenericEmbed("Feedback Thread", "You didn't respond in time so we can't make a thread at the moment, feel free to post your message again and try again")]});
-                            await message.delete();
-                            doReturn.push(true);
-                        });
-
-                    if (doBreak.includes(true)) {
-                        break;
-                    }
-
-                    if (doReturn.includes(true)) {
-                        return;
-                    }
-
-
-                }
+                title.push(message.content.substring(0, 30));
             } else {
                 title.push(message.content);
             }

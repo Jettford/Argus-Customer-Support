@@ -50,6 +50,11 @@ module.exports = class ReactionHandler extends Handler {
 
     async reactionAddHandler(reaction, user) {
         if (user.bot) return;
+        if (typeof reaction === 'undefined') {
+            // fuck, discord did a wacky
+            return;
+        }
+
         if (reaction.partial) {
             try {
                 await reaction.fetch();
@@ -85,6 +90,10 @@ module.exports = class ReactionHandler extends Handler {
 
     async reactionRemoveHandler(reaction, user) {
         if (user.bot) return;
+        if (typeof reaction === 'undefined') {
+            // fuck, discord did a wacky
+            return;
+        }
         if (reaction.partial) {
             try {
                 await reaction.fetch();
