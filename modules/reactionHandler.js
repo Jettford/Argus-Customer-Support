@@ -63,7 +63,9 @@ module.exports = class ReactionHandler extends Handler {
             }
         }
 
-        await db.get("SELECT * FROM threads WHERE message_id = ?", [reaction.message.id], async function (err, row) {
+        let cadet = reaction.message.channel.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+
+        await db.get(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE message_id = ?`, [reaction.message.id], async function (err, row) {
             if (row) {
                 // we know we have a reaction on the feedback message
 
@@ -71,11 +73,11 @@ module.exports = class ReactionHandler extends Handler {
 
                 if (reaction.emoji.name === "👍") {
                     // thumbs up
-                    stmt = db.prepare("UPDATE threads SET thumbs_up = ? WHERE message_id = ?");
+                    stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET thumbs_up = ? WHERE message_id = ?`);
                     await reaction.message.reactions.resolve("👎").users.remove(user);
                 } else if (reaction.emoji.name === "👎") {
                     // thumbs down
-                    stmt = db.prepare("UPDATE threads SET thumbs_down = ? WHERE message_id = ?");
+                    stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET thumbs_down = ? WHERE message_id = ?`);
                     await reaction.message.reactions.resolve("👍").users.remove(user);
                 } else {
                     return;
@@ -83,7 +85,7 @@ module.exports = class ReactionHandler extends Handler {
 
                 await stmt.run(reaction.count - 1, reaction.message.id);
 
-                await updateLeaderboard();
+                await updateLeaderboard(cadet);
             }
         });
     }
@@ -102,7 +104,9 @@ module.exports = class ReactionHandler extends Handler {
             }
         }
 
-        await db.get("SELECT * FROM threads WHERE message_id = ?", [reaction.message.id], async function (err, row) {
+        let cadet = reaction.message.channel.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+
+        await db.get(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE message_id = ?`, [reaction.message.id], async function (err, row) {
             if (row) {
                 // we know we have a reaction on the feedback message
 
@@ -110,17 +114,17 @@ module.exports = class ReactionHandler extends Handler {
 
                 if (reaction.emoji.name === "👍") {
                     // thumbs up
-                    stmt = db.prepare("UPDATE threads SET thumbs_up = ? WHERE message_id = ?");
+                    stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET thumbs_up = ? WHERE message_id = ?`);
                 } else if (reaction.emoji.name === "👎") {
                     // thumbs down
-                    stmt = db.prepare("UPDATE threads SET thumbs_down = ? WHERE message_id = ?");
+                    stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET thumbs_down = ? WHERE message_id = ?`);
                 } else {
                     return;
                 }
 
                 await stmt.run(reaction.count - 1, reaction.message.id);
 
-                await updateLeaderboard();
+                await updateLeaderboard(cadet);
             }
         });
     }

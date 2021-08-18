@@ -22,19 +22,7 @@ module.exports = class MessageHandler extends Handler {
 
         let args = message.content.split(' ');
 
-        if (message.content.startsWith("!")) {
-            if (message.member.roles.cache.some(r => r.id === config["MOD_ROLE"])) {
-                if (message.content.startsWith("!send_embed")) {
-                    let leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
-                    if (leaderboardChannel.partial) await leaderboardChannel.fetch();
-                    leaderboardChannel.send({embeds: [getGenericEmbed("Placeholder", "Placeholder")]});
-                } else if (message.content.startsWith("!refresh_leaderboard")) {
-                    await updateLeaderboard();
-                }
-            }
-        }
-
-        if (message.channel.parentId === config["SUGGESTIONS"]) {
+        if (message.channel.parentId === config["SUGGESTIONS"] || message.channel.id === config["CADET_FEEDBACK_CHANNEL"]) {
             if (message.content === "") {
                 message.delete();
                 return;
@@ -64,10 +52,13 @@ module.exports = class MessageHandler extends Handler {
             });
             await threadMessage.react('👍').then(async () => await threadMessage.react('👎'));
 
-            let stmt = db.prepare("INSERT INTO threads VALUES (?,?,?,?,?,?,?)");
+            let threadsTableName = "threads";
+            if (message.channel.id === config["CADET_FEEDBACK_CHANNEL"]) threadsTableName = "cadet_threads";
+
+            let stmt = db.prepare(`INSERT INTO ${threadsTableName} VALUES (?,?,?,?,?,?,?)`);
             await stmt.run(threadMessage.channel.id, threadMessage.id, message.author.id, message.content, 0, 0, 0);
 
-            await updateLeaderboard();
+            await updateLeaderboard(message.channel.id === config["CADET_FEEDBACK_CHANNEL"]);
         }
     }
 };

@@ -30,14 +30,24 @@ const optionsForLeaderboard = [
     }
 ];
 
-async function updateLeaderboard() {
+async function updateLeaderboard(cadet) {
     try {
-        let leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
+        let leaderboardChannel = null;
+        if (cadet) {
+            leaderboardChannel = client.channels.cache.get(config["CADET_FEEDBACK_LEADERBOARD_CHANNEL"]);
+        } else {
+            leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
+        }
         if (leaderboardChannel.partial) await leaderboardChannel.fetch();
-        let message = await leaderboardChannel.messages.fetch(config["LEADERBOARD_MESSAGE"]);
+        let message = null;
+        if (cadet) {
+             message = await leaderboardChannel.messages.fetch(config["CADET_FEEDBACK_LEADERBOARD_MESSAGE"]);
+        } else {
+            message = await leaderboardChannel.messages.fetch(config["LEADERBOARD_MESSAGE"]);
+        }
         const leaderboardEmbed = new MessageEmbed().setColor('#0099ff').setTitle("**Leaderboard**");
         let descriptionValue = ["**Top 10:** \n"];
-        db.each("SELECT * FROM threads WHERE is_locked = 0 ORDER BY (thumbs_up - thumbs_down) DESC LIMIT 10;", [], async function (err, row) {
+        db.each(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE is_locked = 0 ORDER BY (thumbs_up - thumbs_down) DESC LIMIT 10;`, [], async function (err, row) {
             descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
         }, async () => {
             leaderboardEmbed.setDescription(descriptionValue.join("\n"));
@@ -62,17 +72,30 @@ class LeaderboardHandler extends Handler {
 
     async readyHandler() {
         // it is ready
-        await updateLeaderboard();
+        await updateLeaderboard(false);
+        await updateLeaderboard(true);
     }
 
     async interactionCreate(interaction) {
         if (!interaction.isSelectMenu()) return;
         let sqlValue = "";
 
+        let cadet = interaction.message.channel.id === config["CADET_FEEDBACK_LEADERBOARD_CHANNEL"];
+
         try {
-            let leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
+            let leaderboardChannel = null;
+            if (cadet) {
+                leaderboardChannel = client.channels.cache.get(config["CADET_FEEDBACK_LEADERBOARD_CHANNEL"]);
+            } else {
+                leaderboardChannel = client.channels.cache.get(config["LEADERBOARD_CHANNEL"]);
+            }
             if (leaderboardChannel.partial) await leaderboardChannel.fetch();
-            let message = await leaderboardChannel.messages.fetch(config["LEADERBOARD_MESSAGE"]);
+            let message = null;
+            if (cadet) {
+                message = await leaderboardChannel.messages.fetch(config["CADET_FEEDBACK_LEADERBOARD_MESSAGE"]);
+            } else {
+                message = await leaderboardChannel.messages.fetch(config["LEADERBOARD_MESSAGE"]);
+            }
             const leaderboardEmbed = new MessageEmbed().setColor('#0099ff').setTitle("**Leaderboard**");
             let descriptionValue = [];
             let found = false;
@@ -91,8 +114,9 @@ class LeaderboardHandler extends Handler {
                 }
             }
             if (!found) descriptionValue.push("**Top 10:** \n");
+            if (cadet) sqlValue = sqlValue.replace("threads", "cadet_threads");
             db.each(sqlValue, [], async function (err, row) {
-                descriptionValue.push(`<#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
+                descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
             }, async () => {
                 leaderboardEmbed.setDescription(descriptionValue.join("\n"));
                 await interaction.update({ embeds: [leaderboardEmbed] });
