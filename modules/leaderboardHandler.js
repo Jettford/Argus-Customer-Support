@@ -48,7 +48,7 @@ async function updateLeaderboard(cadet) {
         const leaderboardEmbed = new MessageEmbed().setColor('#0099ff').setTitle("**Leaderboard**");
         let descriptionValue = ["**Top 10:** \n"];
         db.each(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE is_locked = 0 ORDER BY (thumbs_up - thumbs_down) DESC LIMIT 10;`, [], async function (err, row) {
-            descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
+            descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = +${row.thumbs_up} | -${row.thumbs_down}`);
         }, async () => {
             leaderboardEmbed.setDescription(descriptionValue.join("\n"));
             const row = new MessageActionRow().addComponents(new MessageSelectMenu().setCustomId('select').setPlaceholder('Sort by (default: Top 10)').addOptions(optionsForLeaderboard));
