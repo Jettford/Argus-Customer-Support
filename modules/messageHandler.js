@@ -23,6 +23,10 @@ module.exports = class MessageHandler extends Handler {
         let args = message.content.split(' ');
 
         if (message.channel.parentId === config["SUGGESTIONS"] || message.channel.id === config["CADET_FEEDBACK_CHANNEL"]) {
+            if (config["EXCLUDED_CHANNELS"].includes(message.channel.id)) {
+                return;
+            }
+
             if (message.content === "") {
                 message.delete();
                 return;
