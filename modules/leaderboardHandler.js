@@ -116,7 +116,7 @@ class LeaderboardHandler extends Handler {
             if (!found) descriptionValue.push("**Top 10:** \n");
             if (cadet) sqlValue = sqlValue.replace("threads", "cadet_threads");
             db.each(sqlValue, [], async function (err, row) {
-                descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = ${(row.thumbs_up - row.thumbs_down)}`);
+                descriptionValue.push(`**${descriptionValue.length}:** <#${row.channel_id}> = +${row.thumbs_up} | -${row.thumbs_down}`);
             }, async () => {
                 leaderboardEmbed.setDescription(descriptionValue.join("\n"));
                 await interaction.update({ embeds: [leaderboardEmbed] });

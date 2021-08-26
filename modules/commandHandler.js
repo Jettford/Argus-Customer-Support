@@ -29,7 +29,15 @@ module.exports = class CommandHandler extends Handler {
                 if (message.content.startsWith("!send_embed")) {
                     message.channel.send({embeds: [getGenericEmbed("Placeholder", "Placeholder")]});
                 } else if (message.content.startsWith("!refresh_leaderboard")) {
-                    await updateLeaderboard();
+                    await updateLeaderboard(true);
+                    await updateLeaderboard(false);
+                } else if (message.content.startsWith("!close")) {
+                    try {
+                        message.channel.setArchived(true);
+                    }
+                    catch (e) {
+                        
+                    }
                 }
             }
         }
