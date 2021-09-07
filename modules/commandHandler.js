@@ -41,6 +41,7 @@ module.exports = class CommandHandler extends Handler {
                 } else if (message.content.startsWith("!lock")) {
                     try {
                         message.channel.setLocked(true);
+                        await message.delete();
                     }
                     catch (e) {
                         
