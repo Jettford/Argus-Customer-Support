@@ -38,6 +38,13 @@ module.exports = class CommandHandler extends Handler {
                     catch (e) {
                         
                     }
+                } else if (message.content.startsWith("!lock")) {
+                    try {
+                        message.channel.setLocked(true);
+                    }
+                    catch (e) {
+                        
+                    }
                 }
             }
         }
