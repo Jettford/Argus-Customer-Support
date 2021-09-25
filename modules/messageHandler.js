@@ -36,17 +36,17 @@ module.exports = class MessageHandler extends Handler {
                 return;
             }
 
-            if (message.content === "") {
+            if (message.cleanContent === "") {
                 message.delete();
                 return;
             }
 
             let title = []; // can't set variables in lambdas but you can use arrays
 
-            if (message.content.length > 30) {
-                title.push(message.content.substring(0, 30));
+            if (message.cleanContent.length > 30) {
+                title.push(message.cleanContent.substring(0, 30));
             } else {
-                title.push(message.content);
+                title.push(message.cleanContent);
             }
 
             const thread = await message.channel.threads.create({
