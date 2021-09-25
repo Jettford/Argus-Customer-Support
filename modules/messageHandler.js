@@ -3,6 +3,15 @@ let config = require('./../config.json');
 const {getGenericEmbed} = require("./embeds.js");
 const {updateLeaderboard} = require("./leaderboardHandler.js");
 
+function arrayContains(needle, haystack) {
+    var length = haystack.length;
+    for(var i = 0; i < length; i++) {
+        if(haystack[i] == needle)
+            return true;
+    }
+    return false;
+}
+
 module.exports = class MessageHandler extends Handler {
     constructor() {
         super();
@@ -22,7 +31,7 @@ module.exports = class MessageHandler extends Handler {
 
         let args = message.content.split(' ');
 
-        if (message.channel.parentId === config["SUGGESTIONS"] || message.channel.id === config["CADET_FEEDBACK_CHANNEL"]) {
+        if (message.channel.parentId === config["SUGGESTIONS"] || config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id)) {
             if (config["EXCLUDED_CHANNELS"].includes(message.channel.id)) {
                 return;
             }
@@ -39,6 +48,7 @@ module.exports = class MessageHandler extends Handler {
             } else {
                 title.push(message.content);
             }
+
             const thread = await message.channel.threads.create({
                 name: title[0],
                 autoArchiveDuration: (message.channel.guild.premiumSubscriptionCount > 14) ? 10080 : 1440,
@@ -57,12 +67,12 @@ module.exports = class MessageHandler extends Handler {
             await threadMessage.react('👍').then(async () => await threadMessage.react('👎'));
 
             let threadsTableName = "threads";
-            if (message.channel.id === config["CADET_FEEDBACK_CHANNEL"]) threadsTableName = "cadet_threads";
+            if (config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id)) threadsTableName = "cadet_threads";
 
             let stmt = db.prepare(`INSERT INTO ${threadsTableName} VALUES (?,?,?,?,?,?,?)`);
             await stmt.run(threadMessage.channel.id, threadMessage.id, message.author.id, message.content, 0, 0, 0);
 
-            await updateLeaderboard(message.channel.id === config["CADET_FEEDBACK_CHANNEL"]);
+            await updateLeaderboard(config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id));
         }
     }
 };
