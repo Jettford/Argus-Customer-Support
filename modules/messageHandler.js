@@ -31,7 +31,9 @@ module.exports = class MessageHandler extends Handler {
 
         let args = message.content.split(' ');
 
-        if (message.channel.parentId === config["SUGGESTIONS"] || config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id)) {
+        let cadet = config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id);
+
+        if (message.channel.parentId === config["SUGGESTIONS"] || cadet) {
             if (config["EXCLUDED_CHANNELS"].includes(message.channel.id)) {
                 return;
             }
@@ -67,12 +69,12 @@ module.exports = class MessageHandler extends Handler {
             await threadMessage.react('👍').then(async () => await threadMessage.react('👎'));
 
             let threadsTableName = "threads";
-            if (config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id)) threadsTableName = "cadet_threads";
+            if (cadet) threadsTableName = "cadet_threads";
 
             let stmt = db.prepare(`INSERT INTO ${threadsTableName} VALUES (?,?,?,?,?,?,?)`);
             await stmt.run(threadMessage.channel.id, threadMessage.id, message.author.id, message.content, 0, 0, 0);
 
-            await updateLeaderboard(config["CADET_FEEDBACK_CHANNELS"].includes(message.channel.id));
+            await updateLeaderboard(cadet);
         }
     }
 };

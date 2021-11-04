@@ -63,14 +63,13 @@ module.exports = class ReactionHandler extends Handler {
             }
         }
 
-        let cadet = reaction.message.channel.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+        let cadet = config["CADET_FEEDBACK_CHANNELS"].includes(reaction.message.channel.parent.id);
 
         await db.get(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE message_id = ?`, [reaction.message.id], async function (err, row) {
             if (row) {
                 // we know we have a reaction on the feedback message
 
                 let stmt = null;
-
                 if (reaction.emoji.name === "👍") {
                     // thumbs up
                     stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET thumbs_up = ? WHERE message_id = ?`);
@@ -104,7 +103,7 @@ module.exports = class ReactionHandler extends Handler {
             }
         }
 
-        let cadet = reaction.message.channel.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+        let cadet = config["CADET_FEEDBACK_CHANNELS"].includes(reaction.message.channel.parent.id);
 
         await db.get(`SELECT * FROM ${cadet ? "cadet_threads" : "threads"} WHERE message_id = ?`, [reaction.message.id], async function (err, row) {
             if (row) {

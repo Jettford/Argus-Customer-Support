@@ -34,6 +34,7 @@ module.exports = class CommandHandler extends Handler {
                 } else if (message.content.startsWith("!close")) {
                     try {
                         message.channel.setArchived(true);
+                        await message.delete();
                     }
                     catch (e) {
                         

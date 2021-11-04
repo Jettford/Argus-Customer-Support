@@ -19,7 +19,7 @@ module.exports = class ThreadHandler extends Handler {
     }
 
     async threadUpdateHandler(oldThread, newThread) {
-        let cadet = newThread.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+        let cadet = config["CADET_FEEDBACK_CHANNELS"].includes(newThread.parent.id);
         if (oldThread.locked !== newThread.locked) {
             let stmt = db.prepare(`UPDATE ${cadet ? "cadet_threads" : "threads"} SET is_locked = ? WHERE channel_id = ?`);
             await stmt.run(newThread.locked ? 1 : 0, newThread.id);
@@ -34,7 +34,7 @@ module.exports = class ThreadHandler extends Handler {
     }
 
     async threadDeleteHandler(thread) {
-        let cadet = thread.parent.id === config["CADET_FEEDBACK_CHANNEL"];
+        let cadet = config["CADET_FEEDBACK_CHANNELS"].includes(thread.parent.id);
         let stmt = db.prepare(`DELETE FROM ${cadet ? "cadet_threads" : "threads"} WHERE channel_id = ?`);
         await stmt.run(thread.id);
         await updateLeaderboard(cadet);
