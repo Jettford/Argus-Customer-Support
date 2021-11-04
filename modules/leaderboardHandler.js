@@ -20,7 +20,7 @@ const optionsForLeaderboard = [
         label: "Top Controversial",
         description: "The top 10 controversial threads",
         value: "controversial_10",
-        sql: "SELECT * FROM threads WHERE is_locked = 0 ORDER BY -(ABS(thumbs_up - thumbs_down)) DESC LIMIT 10;"
+        sql: "SELECT * FROM threads WHERE is_locked = 0 AND (thumbs_up != 0 OR thumbs_down != 0) ORDER BY -(ABS(thumbs_up - thumbs_down)) DESC LIMIT 10;"
     },
     {
         label: "Most Popular",
@@ -114,8 +114,7 @@ class LeaderboardHandler extends Handler {
                 }
             }
             if (!found) descriptionValue.push("**Top 10:** \n");
-            if (cadet) sqlValue = sqlValue.replace("threads", "cadet_threads");
-            db.each(sqlValue, [], async function (err, row) {
+            db.each(cadet ? sqlValue.replace("threads", "cadet_threads") : sqlValue, [], async function (err, row) {
                 descriptionValue.push(`**${descriptionValue.length}:** **[${row.feedback.slice(0, 30)}](https://discord.com/channels/${interaction.message.guild.id}/${row.channel_id}/${row.message_id})** = +${row.thumbs_up} | -${row.thumbs_down}`);
             }, async () => {
                 leaderboardEmbed.setDescription(descriptionValue.join("\n"));
